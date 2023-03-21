@@ -6,21 +6,22 @@ def my_get_Gaussian2D_mask(msize, sigma=1):
     # ToDo
     # 2D gaussian filter 만들기
     #########################################
-    y, x = np.mgrid[???:???, ???:???]
+    y, x = np.mgrid[-(msize[0] // 2):(msize[0] - msize[0] // 2), -(msize[1] // 2):(msize[1] - msize[1] // 2)]
+    y, x
     '''
     y, x = np.mgrid[-1:2, -1:2]
-    y = [[-1,-1,-1],
+    y = [[-1,-1,-1], // 열방향 중복
          [ 0, 0, 0],
          [ 1, 1, 1]]
-    x = [[-1, 0, 1],
+    x = [[-1, 0, 1], // 행방향 중복
          [-1, 0, 1],
          [-1, 0, 1]]
     '''
     # 파이 => np.pi 를 쓰시면 됩니다.
     # 2차 gaussian mask 생성
-    gaus2D = ???
+    gaus2D = 1 / (2 * (np.pi * (sigma**2))) * np.exp(-((x ** 2 + y ** 2) / 2 * sigma ** 2))
     # mask의 총 합 = 1
-    gaus2D /= ???
+    gaus2D /= np.sum(gaus2D)
 
     return gaus2D
 
@@ -39,10 +40,15 @@ def my_get_Gaussian1D_mask(msize, sigma=1):
     '''
 
     # 파이 => np.pi 를 쓰시면 됩니다.
-    gaus1D = ???
+
+    '''
+    ! 오류 및 해결 !
+    단순한 괄호 여닫기 문제 였음. 특히 np.exp부분 괄호 잘 볼 것
+    '''
+    gaus1D = (1 / ((2 * np.pi) ** 1/2) * sigma) * (np.exp(-(x ** 2) / 2 * (sigma ** 2)))
 
     # mask의 총 합 = 1
-    gaus1D /= ???
+    gaus1D /= np.sum(gaus1D)
     return gaus1D
 
 def my_mask(ftype, fshape, sigma=1):
@@ -52,8 +58,8 @@ def my_mask(ftype, fshape, sigma=1):
         # TODO                                            #
         # mask 완성                                       #
         ###################################################
-        mask = ???
-        mask = ???
+        mask = np.ones(fshape)
+        mask = 1 / np.sum(mask) * mask
 
         #mask 확인
         print(mask)
@@ -67,9 +73,9 @@ def my_mask(ftype, fshape, sigma=1):
 
         base_mask = np.zeros(fshape)
         base_mask[fshape[0]//2, fshape[1]//2] = 2
-        aver_mask = ???
-        aver_mask = ???
-        mask = ???
+        aver_mask = np.ones(fshape)
+        aver_mask = 1 / np.sum(aver_mask) * aver_mask
+        mask = base_mask - aver_mask
 
         #mask 확인
         print(mask)
@@ -112,27 +118,37 @@ def my_filtering(src, mask):
     h, w = src.shape
     m_h, m_w = mask.shape
     pad_img = my_zero_padding(src, (m_h//2, m_w//2))
-    dst = ???
+    dst = np.zeros((h, w))
     
     """
     반복문을 이용하여 filtering을 완성하기
     """
     for row in range(h):
         for col in range(w):
-            val = ???
+            val = np.sum(pad_img[row:row + m_h, col:col + m_w] * mask)
             val = np.clip(val, 0, 255) #범위를 0~255로 조정
-            ??? = val
+            dst[row, col] = val
 
     dst = (dst+0.5).astype(np.uint8) #uint8의 형태로 조정
 
     return dst
 
 if __name__ == '__main__':
-    src = cv2.imread('../baby.jpg', cv2.IMREAD_GRAYSCALE)
+
+    '''
+    ! 오류 ! 및 해결
+    
+    처음 파일 경로 한글이라 cv2.imread가 에러를 내보냄
+    파일 경로 영어로 수정했음에도 똑같은 오류 발생
+    따로 'Lena.png'선언 후 사용함
+    '''
+    fname = 'Lena.png'
+
+    src = cv2.imread(fname, cv2.IMREAD_GRAYSCALE)
 
     # 3x3 filter
-    average_mask = my_mask('average', (3, 3))
-    sharpening_mask = my_mask('sharpening', (3, 3))
+    average_mask = my_mask('average', (5, 5))
+    sharpening_mask = my_mask('sharpening', (5, 5))
 
     #원하는 크기로 설정
     #dst_average = my_filtering(src, 'average', (5,5))
@@ -144,13 +160,12 @@ if __name__ == '__main__':
     #dst_average = my_filtering(src, 'average', (11,13))
     #dst_sharpening = my_filtering(src, 'sharpening', (11,13))
 
-
     dst_average = my_filtering(src, average_mask)
     dst_sharpening = my_filtering(src, sharpening_mask)
 
     # Gaussian filter
-    gaussian2d_mask = my_mask('gaussian2D', (3, 3), sigma=1)
-    gaussian1d_mask = my_mask('gaussian1D', 3, sigma=1)
+    gaussian2d_mask = my_mask('gaussian2D', (7, 7), sigma=0.1)
+    gaussian1d_mask = my_mask('gaussian1D', 7, sigma=0.1)
 
     dst_gaussian2d = my_filtering(src, gaussian2d_mask)
 
