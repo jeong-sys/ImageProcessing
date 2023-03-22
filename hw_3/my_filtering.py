@@ -9,8 +9,6 @@ def my_get_Gaussian2D_mask(msize, sigma=1):
     height, weight = msize
     y, x = np.mgrid[-(weight // 2):(weight // 2) + 1, -(height // 2):(height // 2) + 1]
     y, x
-    print(y)
-    print(x)
     '''
     y, x = np.mgrid[-1:2, -1:2]
     y = [[-1,-1,-1], // 열방향 중복
@@ -24,10 +22,11 @@ def my_get_Gaussian2D_mask(msize, sigma=1):
     # 2차 gaussian mask 생성
 
     '''
-    도대체 ? 선명해지는 거라고 배웠는데 식을 적용하면 흐려지는거임.
+    오류 : GAUSSIAN 식 썼을때, 시그마 값 높으면 값이 흐려짐 !
+    해결 : 괄호 잘 해주기(식 잘 써주기)
     '''
-    # gaus2D = 1 / (2 * np.pi * sigma ** 2) * np.exp(-((x ** 2 + y ** 2) / (2 * sigma ** 2)))
-    gaus2D = 1 / (2 * (np.pi * (sigma ** 2))) * np.exp(-((x ** 2 + y ** 2) / 2 * sigma ** 2))
+    gaus2D = 1 / (2 * np.pi * sigma ** 2) * np.exp(-((x ** 2 + y ** 2) / (2 * sigma ** 2)))
+
     # mask의 총 합 = 1
     gaus2D /= np.sum(gaus2D)
 
@@ -53,12 +52,7 @@ def my_get_Gaussian1D_mask(msize, sigma=1):
     ! 오류 및 해결 !
     단순한 괄호 여닫기 문제 였음. 특히 np.exp부분 괄호 잘 볼 것
     '''
-
-    '''
-    도대체 ? 선명해지는 거라고 배웠는데 식을 적용하면 흐려지는거임.
-    '''
-    gaus1D = (1 / ((2 * np.pi) ** 1/2) * sigma) * (np.exp(-(x ** 2) / 2 * (sigma ** 2)))
-    # gaus1D = 1 / (((2 * np.pi) ** 1/2) * sigma) * np.exp(-(x ** 2) / (2 * (sigma ** 2)))
+    gaus1D = 1 / (((2 * np.pi) ** 1/2) * sigma) * np.exp(-(x ** 2) / (2 * sigma ** 2))
 
     # mask의 총 합 = 1
     gaus1D /= np.sum(gaus1D)
@@ -71,7 +65,8 @@ def my_mask(ftype, fshape, sigma=1):
         # TODO                                            #
         # mask 완성                                       #
         ###################################################
-        mask = np.ones(fshape) / (fshape[0] * fshape[1])
+        mask = np.ones(fshape)
+        mask = mask / (fshape[0] * fshape[1])
 
         #mask 확인
         print(mask)
@@ -84,8 +79,9 @@ def my_mask(ftype, fshape, sigma=1):
         ##################################################
 
         base_mask = np.zeros(fshape)
-        base_mask[fshape[0]//2, fshape[1]//2] = 2
-        aver_mask = np.ones(fshape) / (fshape[0] * fshape[1])
+        base_mask[fshape[0] // 2, fshape[1] // 2] = 2
+        aver_mask = np.ones(fshape)
+        aver_mask = aver_mask / (fshape[0] * fshape[1])
         mask = base_mask - aver_mask
 
         #mask 확인
@@ -157,8 +153,8 @@ if __name__ == '__main__':
     src = cv2.imread(fname, cv2.IMREAD_GRAYSCALE)
 
     # 3x3 filter
-    average_mask = my_mask('average', (3, 3))
-    sharpening_mask = my_mask('sharpening', (3, 3))
+    average_mask = my_mask('average', (5, 5))
+    sharpening_mask = my_mask('sharpening', (5, 5))
 
     #원하는 크기로 설정
     #dst_average = my_filtering(src, 'average', (5,5))
@@ -169,6 +165,7 @@ if __name__ == '__main__':
     #dst_sharpening = my_filtering(src, 'sharpening', (5,3), 'repetition')
     #dst_average = my_filtering(src, 'average', (11,13))
     #dst_sharpening = my_filtering(src, 'sharpening', (11,13))
+
 
     dst_average = my_filtering(src, average_mask)
     dst_sharpening = my_filtering(src, sharpening_mask)
