@@ -57,9 +57,9 @@ if __name__ == '__main__':
     my_dst = my_dst.astype(np.uint8)
 
     # 출력 윈도우에 학번과 이름을 써주시기 바립니다.
-    cv2.imshow('[200000 홍길동]original', src)
-    cv2.imshow('[200000 홍길동]my bilinear mini', my_dst_mini)
-    cv2.imshow('[200000 홍길동]my bilinear', my_dst)
+    cv2.imshow('[20211939 허유정]original', src)
+    cv2.imshow('[20211939 허유정]my bilinear mini', my_dst_mini)
+    cv2.imshow('[20211939 허유정]my bilinear', my_dst)
 
     cv2.waitKey()
     cv2.destroyAllWindows()
