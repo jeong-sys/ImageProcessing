@@ -6,6 +6,20 @@ import numpy as np
 한밭대학교 컴퓨터공학과  20211939 허유정
 """
 
+def my_nearest_neighbor(src, scale):
+    (h, w) = src.shape
+    h_dst = int(h * scale + 0.5)
+    w_dst = int(w * scale + 0.5)
+
+    dst = np.zeros((h_dst, w_dst), np.uint8)
+    for row in range(h_dst):
+        for col in range(w_dst):
+            r = min(int(row / scale + 0.5), h - 1)
+            c = min(int(col / scale + 0.5), w - 1)
+            dst[row, col] = src[r, c]
+
+    return dst
+
 def my_bilinear(src, scale):
     #########################
     # TODO                  #
@@ -23,11 +37,11 @@ def my_bilinear(src, scale):
             y = row / scale
             x = col / scale
 
-            m = ???
-            n = ???
+            m = int(y)
+            n = int(x)
 
-            t = ???
-            s = ???
+            t = -(m-y)
+            s = -(n-x)
 
             """
             픽셀 위치가 이미지를 넘어서는 경우를 막기위해서 조건문을 사용
@@ -38,28 +52,42 @@ def my_bilinear(src, scale):
             3. n+1이 이미지를 넘어서는 경우
             4. 그외
             """
-            value = ???
+            if m+1 > h-1 and n+1 > w-1:
+                value = (1-s) * (1-t) * src[m][n] + s * (1-t) * src[m][n] + (1-s) * t * src[m][n] + s * t * src[m][n]
+            elif m + 1 > h - 1:
+                value = (1-s) * (1-t) * src[m][n] + s * (1-t) * src[m][n+1] + (1-s) * t * src[m][n] + s * t * src[m][n+1]
+            elif n + 1 > w - 1:
+                value = (1-s) * (1-t) * src[m][n] + s * (1-t) * src[m][n] + (1-s) * t * src[m + 1][n] + s * t * src[m+1][n]
+            else:
+                value = (1-s) * (1-t) * src[m][n] + s * (1-t) * src[m][n + 1] + (1-s) * t * src[m+1][n] + s * t * src[m+1][n+1]
 
             dst[row, col] = value
 
     return dst
 
 if __name__ == '__main__':
-    src = cv2.imread('../imgs/Lena.png', cv2.IMREAD_GRAYSCALE)
+    fname = 'Lena.png'
+    src = cv2.imread(fname, cv2.IMREAD_GRAYSCALE)
 
     scale = 3
     #이미지 크기 ??x??로 변경
+    near_my_dst_mini = my_nearest_neighbor(src, 1/scale)
+    near_my_dst_mini = near_my_dst_mini.astype(np.uint8)
     my_dst_mini = my_bilinear(src, 1/scale)
     my_dst_mini = my_dst_mini.astype(np.uint8)
 
     #이미지 크기 512x512로 변경(Lena.png 이미지의 shape는 (512, 512))
+    near_my_dst = my_nearest_neighbor(near_my_dst_mini, scale)
+    near_my_dst = near_my_dst_mini.astype(np.uint8)
     my_dst = my_bilinear(my_dst_mini, scale)
     my_dst = my_dst.astype(np.uint8)
 
     # 출력 윈도우에 학번과 이름을 써주시기 바립니다.
-    cv2.imshow('[20211939 허유정]original', src)
-    cv2.imshow('[20211939 허유정]my bilinear mini', my_dst_mini)
-    cv2.imshow('[20211939 허유정]my bilinear', my_dst)
+    cv2.imshow('[20211939 Heo you jeong]original', src)
+    cv2.imshow('[20211939 Heo you jeong]my nearest mini', near_my_dst_mini)
+    cv2.imshow('[20211939 Heo you jeong]my nearest', near_my_dst)
+    cv2.imshow('[20211939 Heo you jeong]my bilinear mini', my_dst_mini)
+    cv2.imshow('[20211939 Heo you jeong]my bilinear', my_dst)
 
     cv2.waitKey()
     cv2.destroyAllWindows()
