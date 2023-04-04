@@ -3,7 +3,7 @@ import numpy as np
 
 """
 해당 부분에 여러분 정보 입력해주세요.
-한밭대학교 컴퓨터공학과  20211939 허유정
+한밭대학교 컴퓨터공학과  20211939 허유정(Heo You Jeong)
 """
 
 def my_nearest_neighbor(src, scale):
