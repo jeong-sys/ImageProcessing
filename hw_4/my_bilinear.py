@@ -40,8 +40,8 @@ def my_bilinear(src, scale):
             m = int(y)
             n = int(x)
 
-            t = -(m-y)
-            s = -(n-x)
+            t = abs(y-m)
+            s = abs(x-n)
 
             """
             픽셀 위치가 이미지를 넘어서는 경우를 막기위해서 조건문을 사용
@@ -52,15 +52,28 @@ def my_bilinear(src, scale):
             3. n+1이 이미지를 넘어서는 경우
             4. 그외
             """
-            if m+1 > h-1 and n+1 > w-1:
-                value = (1-s) * (1-t) * src[m][n] + s * (1-t) * src[m][n] + (1-s) * t * src[m][n] + s * t * src[m][n]
-            elif m + 1 > h - 1:
-                value = (1-s) * (1-t) * src[m][n] + s * (1-t) * src[m][n+1] + (1-s) * t * src[m][n] + s * t * src[m][n+1]
-            elif n + 1 > w - 1:
-                value = (1-s) * (1-t) * src[m][n] + s * (1-t) * src[m][n] + (1-s) * t * src[m + 1][n] + s * t * src[m+1][n]
-            else:
-                value = (1-s) * (1-t) * src[m][n] + s * (1-t) * src[m][n + 1] + (1-s) * t * src[m+1][n] + s * t * src[m+1][n+1]
 
+            if m + 1 >= h and n + 1 >= w:
+                value = (1 - s) * (1 - t) * src[m][n] + s * (1 - t) * src[m][n] + (1 - s) * t * src[m][n] + s * t * \
+                        src[m][n]
+            elif m + 1 >= h:
+                value = (1 - s) * (1 - t) * src[m][n] + s * (1 - t) * src[m][n + 1] + (1 - s) * t * src[m][n] + s * t * \
+                        src[m][n + 1]
+            elif n + 1 >= w:
+                value = (1 - s) * (1 - t) * src[m][n] + s * (1 - t) * src[m][n] + (1 - s) * t * src[m + 1][n] + s * t * \
+                        src[m + 1][n]
+
+
+            if m + 1 >= h and n + 1 >= w:
+                value = src[h - 1, w - 1]
+            elif m + 1 >= h and n + 1 < w:
+                value = ((1 - s) * src[h - 1, n]) + (s * src[h - 1, n + 1])
+            elif m + 1 < h and n + 1 >= w:
+                value = ((1 - t) * src[m, w - 1]) + (t * src[m + 1, w - 1])
+            else:
+                value = (1-s) * (1-t) * src[m][n] + s * (1-t) * src[m][n+1] + (1-s) * t * src[m+1][n] + s * t * src[m+1][n+1]
+
+            value = int(value)
             dst[row, col] = value
 
     return dst
