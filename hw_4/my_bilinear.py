@@ -3,9 +3,8 @@ import numpy as np
 
 """
 해당 부분에 여러분 정보 입력해주세요.
-한밭대학교 컴퓨터공학과  20211939 허유정(Heo You Jeong)
+한밭대학교 컴퓨터공학과  20211939 허유정(Heo you jeong)
 """
-
 def my_nearest_neighbor(src, scale):
     (h, w) = src.shape
     h_dst = int(h * scale + 0.5)
@@ -19,7 +18,6 @@ def my_nearest_neighbor(src, scale):
             dst[row, col] = src[r, c]
 
     return dst
-
 def my_bilinear(src, scale):
     #########################
     # TODO                  #
@@ -30,6 +28,9 @@ def my_bilinear(src, scale):
     w_dst = int(w * scale + 0.5)
 
     dst = np.zeros((h_dst, w_dst))
+
+    # print(f'src', src.shape)
+    # print(f'dst', dst.shape)
 
     # bilinear interpolation 적용
     for row in range(h_dst):
@@ -52,26 +53,14 @@ def my_bilinear(src, scale):
             3. n+1이 이미지를 넘어서는 경우
             4. 그외
             """
-
             if m + 1 >= h and n + 1 >= w:
-                value = (1 - s) * (1 - t) * src[m][n] + s * (1 - t) * src[m][n] + (1 - s) * t * src[m][n] + s * t * \
-                        src[m][n]
+                value = ((1-s)*(1-t)*src[m][n]) + (s*(1-t)*src[m][n]) + ((1-s)*t*src[m][n]) + (s*t*src[m][n])
             elif m + 1 >= h:
-                value = (1 - s) * (1 - t) * src[m][n] + s * (1 - t) * src[m][n + 1] + (1 - s) * t * src[m][n] + s * t * \
-                        src[m][n + 1]
+                value = ((1-s)*(1-t)*src[m][n]) + (s*(1-t)*src[m][n+1]) + ((1-s)*t*src[m][n]) + (s*t*src[m][n+1])
             elif n + 1 >= w:
-                value = (1 - s) * (1 - t) * src[m][n] + s * (1 - t) * src[m][n] + (1 - s) * t * src[m + 1][n] + s * t * \
-                        src[m + 1][n]
-
-
-            if m + 1 >= h and n + 1 >= w:
-                value = src[h - 1, w - 1]
-            elif m + 1 >= h and n + 1 < w:
-                value = ((1 - s) * src[h - 1, n]) + (s * src[h - 1, n + 1])
-            elif m + 1 < h and n + 1 >= w:
-                value = ((1 - t) * src[m, w - 1]) + (t * src[m + 1, w - 1])
+                value = ((1-s)*(1-t)*src[m][n]) + (s*(1-t)*src[m][n]) + ((1-s)*t*src[m+1][n]) + (s*t*src[m+1][n])
             else:
-                value = (1-s) * (1-t) * src[m][n] + s * (1-t) * src[m][n+1] + (1-s) * t * src[m+1][n] + s * t * src[m+1][n+1]
+                value = ((1-s)*(1-t)*src[m][n]) + (s*(1-t)*src[m][n+1]) + ((1-s)*t*src[m+1][n]) + (s*t*src[m+1][n+1])
 
             value = int(value)
             dst[row, col] = value
@@ -79,11 +68,12 @@ def my_bilinear(src, scale):
     return dst
 
 if __name__ == '__main__':
+    # cv2 오류로 이미지를 따로 정의해주었습니다.
     fname = 'Lena.png'
     src = cv2.imread(fname, cv2.IMREAD_GRAYSCALE)
 
-    scale = 3
-    #이미지 크기 ??x??로 변경
+    scale = 5
+    #이미지 크기 ??x??로 변경(3: 171x171 /5: 102x102)
     near_my_dst_mini = my_nearest_neighbor(src, 1/scale)
     near_my_dst_mini = near_my_dst_mini.astype(np.uint8)
     my_dst_mini = my_bilinear(src, 1/scale)
@@ -91,11 +81,12 @@ if __name__ == '__main__':
 
     #이미지 크기 512x512로 변경(Lena.png 이미지의 shape는 (512, 512))
     near_my_dst = my_nearest_neighbor(near_my_dst_mini, scale)
-    near_my_dst = near_my_dst_mini.astype(np.uint8)
+    near_my_dst = near_my_dst.astype(np.uint8)
     my_dst = my_bilinear(my_dst_mini, scale)
     my_dst = my_dst.astype(np.uint8)
 
     # 출력 윈도우에 학번과 이름을 써주시기 바립니다.
+    # 한글로 작성시 표기가 되지 않아 [학번 영문이름]으로 출력하였습니다.
     cv2.imshow('[20211939 Heo you jeong]original', src)
     cv2.imshow('[20211939 Heo you jeong]my nearest mini', near_my_dst_mini)
     cv2.imshow('[20211939 Heo you jeong]my nearest', near_my_dst)
