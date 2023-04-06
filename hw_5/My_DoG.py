@@ -4,7 +4,7 @@ import numpy as np
 # library add
 import os, sys
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from my_filtering_true import my_filtering
+from my_filtering_true2 import my_filtering
 
 def get_DoG_filter(fsize, sigma=1):
     ###################################################
