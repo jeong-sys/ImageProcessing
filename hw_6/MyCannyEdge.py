@@ -61,29 +61,29 @@ def non_maximum_supression(magnitude, angle):
             # gradient의 degree는 edge와 수직방향이다.
             if 0 <= degree and degree < 45:
                 rate = np.tan(np.deg2rad(degree))
-                left_magnitude = ???
-                right_magnitude = ???
+                left_magnitude = magnitude[row-1, col+1] * (1 - abs(rate)) + magnitude[row, col+1] * abs(rate)
+                right_magnitude = magnitude[row+1, col-1] * (1 - abs(rate)) + magnitude[row, col-1] * abs(rate)
                 if magnitude[row, col] == max(left_magnitude, magnitude[row, col], right_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
             elif 45 <= degree and degree <= 90:
-                rate = ???
-                up_magnitude = ???
-                down_magnitude = ???
+                rate = np.tan(np.deg2rad(degree))
+                up_magnitude = magnitude[row-1, col-1] * (1 - abs(rate)) + magnitude[row-1, col] * abs(rate)
+                down_magnitude = magnitude[row+1, col+1] * (1 - abs(rate)) + magnitude[row+1, col] * abs(rate)
                 if magnitude[row, col] == max(up_magnitude, magnitude[row, col], down_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
             elif -45 <= degree and degree < 0:
-                rate = ???
-                left_magnitude = ???
-                right_magnitude = ???
+                rate = np.tan(np.deg2rad(degree))
+                left_magnitude = magnitude[row-1, col-1] * (1 - abs(rate)) + magnitude[row, col-1] * abs(rate)
+                right_magnitude = magnitude[row+1, col+1] * (1 - abs(rate)) + magnitude[row, col+1] * abs(rate)
                 if magnitude[row, col] == max(left_magnitude, magnitude[row, col], right_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
             elif -90 <= degree and degree < -45:
-                rate = ???
-                up_magnitude = ???
-                down_magnitude = ???
+                rate = np.tan(np.deg2rad(degree))
+                up_magnitude = magnitude[row+1, col-1] * (1 - abs(rate)) + magnitude[row+1, col] * abs(rate)
+                down_magnitude = magnitude[row-1, col+1] * (1 - abs(rate)) + magnitude[row-1, col] * abs(rate)
                 if magnitude[row, col] == max(up_magnitude, magnitude[row, col], down_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
@@ -142,13 +142,14 @@ def double_thresholding(src):
                 # TODO                                #
                 # High 값 보다 작고 Low 값 보다 큰 경우   #
                 #######################################
+                dst[row, col] = 128
 
     return dst
 
 def my_canny_edge_detection(src, fsize=3, sigma=1):
     """
     한글이나 영어로 작성하기
-    ID, name(학번 이름): 2022012340, Hon Gil Dong
+    ID, name(학번 이름): 20211939, Heo You Jeong
     department(학과): computer science
     """
     # low-pass filter를 이용하여 blur효과
@@ -160,30 +161,31 @@ def my_canny_edge_detection(src, fsize=3, sigma=1):
 
     # magnitude와 angle을 구함
     magnitude = calcMagnitude(Ix, Iy)
-    cv2.imshow('magnitude - 2022012340 Hong Gil Dong', convert_uint8(magnitude))
+    cv2.imshow('magnitude - 20211939 Heo You Jeong', convert_uint8(magnitude))
 
     angle = calcAngle(Ix, Iy)
 
     # non-maximum suppression 수행
     larger_magnitude = non_maximum_supression(magnitude, angle)
-    cv2.imshow('NMS - 2022012340 Hong Gil Dong', convert_uint8(larger_magnitude))
+    cv2.imshow('NMS - 20211939 Heo You Jeong', convert_uint8(larger_magnitude))
 
     # strong / weak edge 확인용
     strong_edge_img, weak_edge_img = show_strong_weak_edge(larger_magnitude)
-    cv2.imshow('strong edge - 2022012340 Hong Gil Dong', strong_edge_img)
-    cv2.imshow('weak edge - 2022012340 Hong Gil Dong', weak_edge_img)
+    cv2.imshow('strong edge - 20211939 Heo You Jeong', strong_edge_img)
+    cv2.imshow('weak edge - 20211939 Heo You Jeong', weak_edge_img)
 
     # double thresholding 수행
     dst = double_thresholding(larger_magnitude)
     return dst
 
 def main():
-    src = cv2.imread('../img/Lena.png', cv2.IMREAD_GRAYSCALE)
+    fname = 'Lena.png'
+    src = cv2.imread(fname, cv2.IMREAD_GRAYSCALE)
 
     dst = my_canny_edge_detection(src)
 
-    cv2.imshow('original - 2022012340 Hong Gil Dong', src)
-    cv2.imshow('my canny edge detection - 2022012340 Hong Gil Dong', dst)
+    cv2.imshow('original - 20211939 Heo You Jeong', src)
+    cv2.imshow('my canny edge detection - 20211939 Heo You Jeong', dst)
     cv2.waitKey()
     cv2.destroyAllWindows()
 
