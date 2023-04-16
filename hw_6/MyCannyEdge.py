@@ -61,29 +61,29 @@ def non_maximum_supression(magnitude, angle):
             # gradient의 degree는 edge와 수직방향이다.
             if 0 <= degree and degree < 45:
                 rate = np.tan(np.deg2rad(degree))
-                left_magnitude = magnitude[row-1, col+1] * (1 - abs(rate)) + magnitude[row, col+1] * abs(rate)
-                right_magnitude = magnitude[row+1, col-1] * (1 - abs(rate)) + magnitude[row, col-1] * abs(rate)
+                left_magnitude = magnitude[row, col-1] * (1 - abs(rate)) + magnitude[row-1, col-1] * abs(rate)
+                right_magnitude = magnitude[row, col+1] * (1 - abs(rate)) + magnitude[row+1, col+1] * abs(rate)
                 if magnitude[row, col] == max(left_magnitude, magnitude[row, col], right_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
             elif 45 <= degree and degree <= 90:
-                rate = np.tan(np.deg2rad(degree))
-                up_magnitude = magnitude[row-1, col-1] * (1 - abs(rate)) + magnitude[row-1, col] * abs(rate)
-                down_magnitude = magnitude[row+1, col+1] * (1 - abs(rate)) + magnitude[row+1, col] * abs(rate)
+                rate = np.tan(np.deg2rad(degree)) - int(np.tan(np.deg2rad(degree)))
+                up_magnitude = magnitude[row-1, col] * (1 - abs(rate)) + magnitude[row-1, col-1] * abs(rate)
+                down_magnitude = magnitude[row+1, col] * (1 - abs(rate)) + magnitude[row+1, col+1] * abs(rate)
                 if magnitude[row, col] == max(up_magnitude, magnitude[row, col], down_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
             elif -45 <= degree and degree < 0:
                 rate = np.tan(np.deg2rad(degree))
-                left_magnitude = magnitude[row-1, col-1] * (1 - abs(rate)) + magnitude[row, col-1] * abs(rate)
-                right_magnitude = magnitude[row+1, col+1] * (1 - abs(rate)) + magnitude[row, col+1] * abs(rate)
+                left_magnitude = magnitude[row, col-1] * (1 - abs(rate)) + magnitude[row+1, col-1] * abs(rate)
+                right_magnitude = magnitude[row, col+1] * (1 - abs(rate)) + magnitude[row-1, col+1] * abs(rate)
                 if magnitude[row, col] == max(left_magnitude, magnitude[row, col], right_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
             elif -90 <= degree and degree < -45:
-                rate = np.tan(np.deg2rad(degree))
-                up_magnitude = magnitude[row+1, col-1] * (1 - abs(rate)) + magnitude[row+1, col] * abs(rate)
-                down_magnitude = magnitude[row-1, col+1] * (1 - abs(rate)) + magnitude[row-1, col] * abs(rate)
+                rate = np.tan(np.deg2rad(degree)) - int(np.tan(np.deg2rad(degree)))
+                up_magnitude = magnitude[row+1, col] * (1 - abs(rate)) + magnitude[row+1, col-1] * abs(rate)
+                down_magnitude = magnitude[row-1, col] * (1 - abs(rate)) + magnitude[row-1, col+1] * abs(rate)
                 if magnitude[row, col] == max(up_magnitude, magnitude[row, col], down_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
