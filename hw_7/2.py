@@ -61,29 +61,29 @@ def non_maximum_supression(magnitude, angle):
             # gradient의 degree는 edge와 수직방향이다.
             if 0 <= degree and degree < 45:
                 rate = np.tan(np.deg2rad(degree))
-                left_magnitude = magnitude[row, col-1] * (1 - rate) + magnitude[row-1, col-1] * rate
-                right_magnitude = magnitude[row, col+1] * (1 - rate) + magnitude[row+1, col+1] * rate
+                left_magnitude = (magnitude[row, col-1] * (1 - rate)) + (magnitude[row-1, col-1] * rate)
+                right_magnitude = (magnitude[row, col+1] * (1 - rate)) + (magnitude[row+1, col+1] * rate)
                 if magnitude[row, col] == max(left_magnitude, magnitude[row, col], right_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
             elif 45 <= degree and degree <= 90:
                 rate = np.tan(np.deg2rad(90 - degree))
-                up_magnitude = magnitude[row-1, col] * (1 - rate) + magnitude[row-1, col-1] * rate
-                down_magnitude = magnitude[row+1, col] * (1 - rate) + magnitude[row+1, col+1] * rate
+                up_magnitude = (magnitude[row-1, col] * (1 - rate)) + (magnitude[row-1, col-1] * rate)
+                down_magnitude = (magnitude[row+1, col] * (1 - rate)) + (magnitude[row+1, col+1] * rate)
                 if magnitude[row, col] == max(up_magnitude, magnitude[row, col], down_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
             elif -45 <= degree and degree < 0:
-                rate = np.tan(np.deg2rad(degree))
-                left_magnitude = magnitude[row, col-1] * (1 - rate) + magnitude[row+1, col-1] * rate
-                right_magnitude = magnitude[row, col+1] * (1 - rate) + magnitude[row-1, col+1] * rate
+                rate = abs(np.tan(np.deg2rad(degree)))
+                left_magnitude = (magnitude[row, col-1] * (1 - rate)) + (magnitude[row+1, col-1] * rate)
+                right_magnitude = (magnitude[row, col+1] * (1 - rate)) + (magnitude[row-1, col+1] * rate)
                 if magnitude[row, col] == max(left_magnitude, magnitude[row, col], right_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
             elif -90 <= degree and degree < -45:
-                rate = np.tan(np.deg2rad(90 + degree))
-                up_magnitude = magnitude[row+1, col+1] * (1 - rate) + magnitude[row+1, col-1] * rate
-                down_magnitude = magnitude[row-1, col-1] * (1 - rate) + magnitude[row-1, col+1] * rate
+                rate = abs(np.tan(np.deg2rad(90 + degree)))
+                up_magnitude = (magnitude[row+1, col] * (1 - rate)) + (magnitude[row+1, col-1] * rate)
+                down_magnitude = (magnitude[row-1, col] * (1 - rate)) + (magnitude[row-1, col+1] * rate)
                 if magnitude[row, col] == max(up_magnitude, magnitude[row, col], down_magnitude):
                     largest_magnitude[row, col] = magnitude[row, col]
 
@@ -139,60 +139,58 @@ def double_thresholding(src):
             elif dst[row, col] < low_threshold_value:
                 dst[row, col] = 0
             else:
-                trace(high_threshold_value, low_threshold_value, dst, row, col, threading_dst)
-
-    return threading_dst
-                # eight_connectivity = np.array([[1,1,1],[1,0,1],[1,1,1]])
-                # n = dst[row-1:row+2, col-1:col+2]
-                #
-                # max_magnitude = np.max(n * eight_connectivity)
-                # if max_magnitude >= high_threshold_value:
-                #     dst[row, col] = 255
-                # else:
-                #     dst[row,col] = 0
-
+                dst[row, col] = 128
                 #######################################
                 # TODO                                #
                 # High 값 보다 작고 Low 값 보다 큰 경우   #
                 #######################################
+    up_d = dst.copy()
+    for row in range(1, h):
+        for col in range(1, w):
+            if (up_d[row, col] == 128):
+                if ((up_d[row + 1, col - 1] == 255) or (up_d[row + 1, col] == 255) or (up_d[row + 1, col + 1] == 255)
+                        or (up_d[row, col - 1] == 255) or (up_d[row, col + 1] == 255) or (up_d[row - 1, col - 1] == 255)
+                        or (up_d[row - 1, col] == 255) or (up_d[row - 1, col + 1] == 255)):
+                    up_d[row, col] = 255
+                else:
+                    up_d[row, col] = 0
 
-                # 주변에 strong이 있으면 255
-                # weak제대로 출력되지 않음
-                # if np.max(dst[row-1:row+2, col-1:col+2]) >= high_threshold_value:
-                #     dst[row, col] = 255
+    down_u = dst.copy()
+    for row in range(h-1, 0, -1):
+        for col in range(w-1 , 0, -1):
+            if (down_u[row, col] == 128):
+                if ((down_u[row + 1, col - 1] == 255) or (down_u[row + 1, col] == 255) or (down_u[row + 1, col + 1] == 255)
+                        or (down_u[row, col - 1] == 255) or (down_u[row, col + 1] == 255) or (down_u[row - 1, col - 1] == 255)
+                        or (down_u[row - 1, col] == 255) or (down_u[row - 1, col + 1] == 255)):
+                    down_u[row, col] = 255
+                else:
+                    down_u[row, col] = 0
 
-    # strong, week연관성 판별(strong기준 255, week기준 128)
-    # for i in range(1, h-1):
-    #     for j in range(1, w-1):
-    #         if (dst[i, j] == 128):
-    #             if ((dst[i + 1, j - 1] == 255) or (dst[i + 1, j] == 255) or (
-    #                     dst[i + 1, j + 1] == 255)
-    #                     or (dst[i, j - 1] == 255) or (dst[i, j + 1] == 255)
-    #                     or (dst[i - 1, j - 1] == 255) or (dst[i - 1, j] == 255) or (
-    #                             dst[i - 1, j + 1] == 255)):
-    #                 dst[i, j] = 255
-    #             else:
-    #                 dst[i, j] = 0
+    left_r = dst.copy()
+    for row in range(h-1, 0, -1):
+        for col in range(1, w):
+            if (left_r[row, col] == 128):
+                if ((left_r[row + 1, col - 1] == 255) or (left_r[row + 1, col] == 255) or (left_r[row + 1, col + 1] == 255)
+                        or (left_r[row, col - 1] == 255) or (left_r[row, col + 1] == 255) or (left_r[row - 1, col - 1] == 255)
+                        or (left_r[row - 1, col] == 255) or (left_r[row - 1, col + 1] == 255)):
+                    left_r[row, col] = 255
+                else:
+                    left_r[row, col] = 0
 
-def trace(high_threshold_value, low_threshold_value, dst, row, col, threading_dst):
-    h, w = dst.shape
+    right_l = dst.copy()
+    for row in range(1, h):
+        for col in range(w-1, 0, -1):
+            if (right_l[row, col] == 128):
+                if ((right_l[row + 1, col - 1] == 255) or (right_l[row + 1, col] == 255) or (right_l[row + 1, col + 1] == 255)
+                        or (right_l[row, col - 1] == 255) or (right_l[row, col + 1] == 255) or (right_l[row - 1, col - 1] == 255)
+                        or (right_l[row - 1, col] == 255) or (right_l[row - 1, col + 1] == 255)):
+                    right_l[row, col] = 255
+                else:
+                    right_l[row, col] = 0
 
-    if (0 <= row < h and 0 <= col < w) == False:
-        return
-
-    elif threading_dst[row, col] == 0 and dst[row, col] > low_threshold_value:
-
-        trace(high_threshold_value, low_threshold_value, dst, row - 1, col - 1, threading_dst)
-        trace(high_threshold_value, low_threshold_value, dst, row - 1, col, threading_dst)
-        trace(high_threshold_value, low_threshold_value, dst, row - 1, col + 1, threading_dst)
-        trace(high_threshold_value, low_threshold_value, dst, row, col - 1, threading_dst)
-        trace(high_threshold_value, low_threshold_value, dst, row, col + 1, threading_dst)
-        trace(high_threshold_value, low_threshold_value, dst, row + 1, col - 1, threading_dst)
-        trace(high_threshold_value, low_threshold_value, dst, row + 1, col, threading_dst)
-        trace(high_threshold_value, low_threshold_value, dst, row + 1, col + 1, threading_dst)
-
-    return
-
+    dst = up_d + down_u + left_r + right_l
+    dst[dst > 255] = 255
+    return dst
 def my_canny_edge_detection(src, fsize=3, sigma=1):
     """
     한글이나 영어로 작성하기
