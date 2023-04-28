@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 
-
 def get_dst_coordinate(src, M):
     h_src, w_src = src.shape[:2]
 
@@ -15,7 +14,11 @@ def get_dst_coordinate(src, M):
     col_list = [0, w_src-1, 0, w_src-1]
 
     for i in range(4):
-        P = np.array([col_list[i]],[row_list[i]],[1])
+        P = np.array([
+            [col_list[i]],
+            [row_list[i]],
+            [1]
+        ])
         P_dst = np.dot(M, P)
         cols.append(P_dst[0][0])
         rows.append(P_dst[1][0])
@@ -51,8 +54,7 @@ def transformation_backward(src, M):
     print("backward calc")
     for row_ in range(h_):
         for col_ in range(w_):
-            P_dst = M_inv.dot()
-
+            P_dst = np.array([[col_ + col_min, row_ + row_min, 1]]).T
             xy = M_inv.dot(P_dst)
             x = xy[0, 0]
             y = xy[1, 0]
@@ -61,25 +63,26 @@ def transformation_backward(src, M):
             pixel의 값을 가져오기 위해서 bilinear 연산을 통해서 값을 가져옴
             bilinear 연산 구현하기
             """
-            if x < 0 or y < 0 or x >= w or y >= h:
+
+            floor_x = int(np.floor(x))
+            floor_y = int(np.floor(y))
+
+            t, s = x - floor_x, y - floor_y
+
+            zz = (1 - t) * (1 - s)
+            zo = t * (1 - s)
+            oz = (1 - t) * s
+            oo = t * s
+
+            if floor_y < 0 or floor_x < 0 or (floor_y + 1) >= h or (floor_x + 1) >= w:
                 continue
 
-            x1 = int(np.floor(x))
-            y1 = int(np.floor(y))
-
-            x2 = x1 + 1
-            y2 = y1 + 1
-
-            dx = x - x1
-            dy = y - y1
-
-            dst[row_, col_, :] = (1 - dy) * ((1 - dx) * src[y1, x1, :] + dx * src[y1, x2, :]) \
-                                 + dy * ((1 - dx) * src[y2, x1, :] + dx * src[y2, x2, :])
-
+            val = src[floor_y, floor_x, :] * zz + src[floor_y, floor_x + 1, :] * zo + \
+                  src[floor_y + 1, floor_x, :] * oz + src[floor_y + 1, floor_x + 1, :] * oo
+            dst[row_, col_, :] = val
 
     dst = ((dst - np.min(dst)) / np.max(dst - np.min(dst)) * 255 + 0.5)  # normalization
     return dst.astype(np.uint8)
-
 
 def transformation_forward(src, M):
     #######################################
@@ -104,20 +107,20 @@ def transformation_forward(src, M):
             x_ = xy_prime[0, 0] - col_min
             y_ = xy_prime[1, 0] - row_min
 
-            if x_ <0 or y_ < 0 or x_ >= w_ or y_ >= h_:
+            if x_ < 0 or y_ < 0 or x_ >= w_ or y_ >= h_:
                 continue
 
             dst[int(y_), int(x_), :] += src[row, col, :]
             count[int(y_), int(x_), :] += 1
 
-    dst = (dst / count)
+    # RuntimeWarning 오류 발생으로 계산식을 수정했습니다.
+    dst = (dst / (count+1E-6))
     return dst.astype(np.uint8)
 
 
 def main():
     src = cv2.imread("Lena.png")
     src = cv2.resize(src, None, fx=0.3, fy=0.3)
-
     ##################################################################
     # TODO                                                           #
     # 행렬 M에 대해서 Forward와 Backward 결과 비교하기                    #
@@ -134,18 +137,25 @@ def main():
     scaling = [[2, 0, 0],
                [0, 2, 0],
                [0, 0, 1]]
+    shear = [[1, 0.4, 0],
+             [0.3, 1, 0],
+             [0, 0, 1]]
 
+    # M = translation
+    # M = rotation
+    # M = scaling
+    # M = shear
     M = np.dot(np.dot(translation, rotation), scaling)
     ##################################################################
 
     forward = transformation_forward(src, M)
     backward = transformation_backward(src, M)
 
-    cv2.imshow("backward", forward)
+    # cv2.imshow("input", src)
+    cv2.imshow("forward", forward)
     cv2.imshow("backward", backward)
     cv2.waitKey()
     cv2.destroyAllWindows()
-
 
 if __name__ == '__main__':
     main()
