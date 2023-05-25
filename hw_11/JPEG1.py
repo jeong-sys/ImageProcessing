@@ -20,8 +20,36 @@ def img2block(src, n=8):
     # img2block 완성                      #
     # img를 block으로 변환하기              #
     ######################################
+    (h, w) = src.shape
+
+    if h % n != 0:
+        h_pad = n - h%n
+    else:
+        h_pad = 0
+
+    if w % n != 0:
+        w_pad = n - w%n
+    else:
+        w_pad = 0
+
+    dst = np.zeros((h+h_pad, w+w_pad))
+    dst[:h, :w] = src
+
+    blocks = []
+    for row in range(0, h+h_pad, n):
+        for col in range(0, w+w_pad, n):
+            block = dst[row:row+n, col:col+n]
+            blocks.append(block)
 
     return np.array(blocks)
+
+# --- 추가
+def C(w, n=8):
+    if w == 0:
+        return (1/n) ** 0.5
+    else:
+        return (2/n) ** 0.5
+
 
 
 def DCT(block, n=8):
@@ -31,20 +59,103 @@ def DCT(block, n=8):
     # 4중 for문으로 구현 시 감점 예정          #
     ######################################
     v, u = block.shape
-    y, x = ???
+    y, x = block.shape
     dst = np.zeros(block.shape)
     for v_ in range(v):
         for u_ in range(u):
-            tmp = ???
-            dst[v_, u_] = ???
+            tmp = 0
+            for y_ in range(y):
+                for x_ in range(x):
+                    tmp ++ block[y_, x_] * np.cos(((2 * x_ + 1) * u_ * np.pi) / (2 * n)) * \
+                           np.cos(((2 * y_ + 1) * v_ * np.pi) / (2 * n))
+            dst[v_, u_] = C(u_, n=n) * C(v_, n=n) * tmp
+
     return np.round(dst)
 
-def my_zigzag_scanning(???):
+def my_zigzag_scanning(block, mode = 'encoding', block_size=8):
     ######################################
     # TODO                               #
     # my_zigzag_scanning 완성             #
     ######################################
-    return ?
+    row = 0
+    col = 0
+    val = 1
+    idx = 0
+    half = False
+    half_count = 0
+    zigzag = []
+    block_recover = np.zeros((block_size, block_size))
+    change = False
+    encoding = True
+
+    a = 1
+    if mode == 'decoding':
+        encoding = False
+
+    while True:
+        if encoding:
+            zigzag.append(block[row][col])
+        else:
+            if idx >= len(block) or block[idx] == 'E0B':
+                break
+            block_recover[row][col] = block[idx]
+            idx += 1
+
+        # 종료 조건
+        if row == block_size - 1 and col == block_size - 1:
+            break
+
+        if half:
+            if a == 0:
+                if col == 0:
+                    row += 1
+                    a = 1
+                else:
+                    row += 1
+                    col -= 1
+
+            else:
+                if row == 0:
+                    col += 1
+                    a = 0
+                else:
+                    row -= 1
+                    col += 1
+
+        else:
+            if a == 0:
+                # 아랫쪽 벽에 부딪혔을 때
+                if row == block_size - 1:
+                    col += 1
+                    a = 1
+                else:  # 부딪히지 않았을 때
+                    row += 1
+                    col -= 1
+
+            else:
+                # 오른쪽 벽에 부딪혔을 때
+                if col == block_size - 1:
+                    row += 1
+                    a = 0
+                else:  # 부딪히지 않았을 때
+                    row -= 1
+                    col += 1
+
+        if row == block_size - 1:
+            half = False
+
+    if encoding:
+        for idx, val in reversed(list(enumerate(zigzag))):
+            if val == 0:
+                del zigzag[idx]
+            else:
+                zigzag.append('EOB')
+                break
+
+            return zigzag
+
+        else:  # decoding
+            return block_recover
 
 def DCT_inv(block, n = 8):
     ###################################################
@@ -52,6 +163,19 @@ def DCT_inv(block, n = 8):
     # DCT_inv 완성                                     #
     # DCT_inv 는 DCT와 다름.                            #
     ###################################################
+
+    y, x = block.shape
+    dst = np.zeros((y, x))
+    v, u = dst.shape
+
+    for y_ in range(y):
+        for x_ in range(x):
+            tmp = 0
+            for v_ in range(v):
+                for u_ in range(u):
+                    tmp += block[v_, u_] * np.cos(((2 * x_ + 1) * u_ * np.pi) / (2 * n)) * \
+                           np.cos(((2 * y_ + 1) * v_ * np.pi) / (2 * n)) * C(u_, n=n) * C(v_, n=n)
+            dst[y_, x_] = tmp
 
     return np.round(dst)
 
@@ -61,6 +185,27 @@ def block2img(blocks, src_shape, n = 8):
     # block2img 완성                                   #
     # 복구한 block들을 image로 만들기                     #
     ###################################################
+
+    (h, w) = src_shape
+    # print('blocks', blocks, 'blocks shape', blocks.shape)
+    if h % n != 0:
+        h_pad = n - h % n
+    else:
+        h_pad = 0
+
+    if w % n != 0:
+        w_pad = n - w % n
+    else:
+        w_pad = 0
+    dst = np.zeros((h + h_pad, w + w_pad), dtype=np.uint8)
+    idx = 0
+
+    print(blocks.shape)
+    print(dst.shape)
+    for row in range(int(h / 8)):
+        for col in range(int(w / 8)):
+            dst[8 * row:8 * (row + 1), 8 * col:8 * (col + 1)] = blocks[idx]
+            idx += 1
 
     return dst
 
