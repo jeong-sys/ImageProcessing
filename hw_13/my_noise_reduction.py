@@ -50,6 +50,7 @@ def add_gaus_noise(src, mean=0, sigma=0.1):
     return my_normalize(dst)
 
 
+
 def my_bilateral(src, msize, sigma, sigma_r):
     ####################################################################################################
     # TODO                                                                                             #
@@ -96,7 +97,8 @@ def my_median_filtering(src, msize):
 
 
 if __name__ == '__main__':
-    src = cv2.imread('canoe.png')
+    src = cv2.imread('./canoe.png')
+    #src = cv2.imread('./canoe.png')
     np.random.seed(seed=100)
 
     noise_image = add_gaus_noise(src, mean=0, sigma=0.1)
@@ -107,14 +109,51 @@ if __name__ == '__main__':
     # RGB에서 Bilateral, Gaussian, Median filter 진행     #
     ######################################################
     # RGB
-    ???
+    src_noise_32f = src_noise.astype(np.float32)
+    b_channel, g_channel, r_channel = cv2.split(src_noise)
+
+    b_bilateral = my_bilateral(b_channel, 5, 10, 0.1).astype(np.uint8)
+    g_bilateral = my_bilateral(g_channel, 5, 10, 0.1).astype(np.uint8)
+    r_bilateral = my_bilateral(r_channel, 5, 10, 0.1).astype(np.uint8)
+
+    b_gaussian = my_filtering(b_channel, my_get_Gaussian2D_mask(5, sigma=1))
+    g_gaussian = my_filtering(g_channel, my_get_Gaussian2D_mask(5, sigma=1))
+    r_gaussian = my_filtering(r_channel, my_get_Gaussian2D_mask(5, sigma=1))
+
+    b_median = my_median_filtering(b_channel, 5)
+    g_median = my_median_filtering(g_channel, 5)
+    r_median = my_median_filtering(r_channel, 5)
+
+    rgb_bilateral_dst = cv2.merge([b_bilateral, g_bilateral, r_bilateral])
+    rgb_gaussian_dst = cv2.merge([b_gaussian, g_gaussian, r_gaussian])
+    rgb_median_dst = cv2.merge([b_median, g_median, r_median])
+
+
 
     ######################################################
     # TODO                                               #
     # YUV에서 Bilateral, Gaussian, Median filter 진행     #
     ######################################################
     # YUV
-    ???
+    yuv = cv2.cvtColor(src_noise_32f, cv2.COLOR_BGR2YUV)
+    y_channel, u_channel, v_channel = cv2.split(yuv)
+
+    y_bilateral = my_bilateral(y_channel, 5, 20, 20)
+    u_bilateral = my_bilateral(u_channel, 5, 20, 20)
+    v_bilateral = my_bilateral(v_channel, 5, 20, 20)
+
+    # Merge the channels
+    yuv_bilateral_dst = cv2.merge([y_bilateral, u_bilateral, v_bilateral])
+
+
+    y_gaussian = my_filtering(y_channel, my_get_Gaussian2D_mask(5, sigma=1))
+    y_median = my_median_filtering(y_channel, 5)
+
+    yuv_bilateral_dst = cv2.merge([y_bilateral, u_bilateral, v_bilateral])
+    yuv_gaussian_dst = cv2.merge([y_gaussian, u_channel, v_channel])
+    yuv_median_dst = cv2.merge([y_median, u_channel, v_channel])
+
+
 
     cv2.imshow('original.png', src)
     cv2.imshow('RGB bilateral', rgb_bilateral_dst)

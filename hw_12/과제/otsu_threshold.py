@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 def apply_threshold(img, th=120):
     ######################################################
     # TODO                                               #
@@ -23,10 +22,10 @@ def my_otsu_threshold(img):
     # Otsu 방법을 통해 threshold 구한 후 이진화 수행          #
     # cv2의 threshold 와 같은 값이 나와야 함                 #
     ######################################################
-    q1 = []
-    q2 = []
-    m1 = []
-    m2 = []
+    q_1 = []
+    q_2 = []
+    m_1 = []
+    m_2 = []
     sigma_1 = []
     sigma_2 = []
     sigma_3 = []
@@ -37,38 +36,38 @@ def my_otsu_threshold(img):
 
         for i in range(k + 1):
             p1_sum += p[i]
-        q1.append(p1_sum)
+        q_1.append(p1_sum)
 
         for j in range(k + 1, len(hist)):
             p2_sum += p[j]
-        q2.append(p2_sum)
+        q_2.append(p2_sum)
 
         try:
             for i in range(k + 1):
                 p1_sum += i * p[i]
-            p1_sum = p1_sum / q1[k]
-            m1.append(p1_sum)
+            p1_sum = p1_sum / q_1[k]
+            m_1.append(p1_sum)
 
             for j in range(k + 1, len(hist)):
                 p2_sum += j * p[j]
-            p2_sum = p2_sum / q2[k]
-            m2.append(p2_sum)
+            p2_sum = p2_sum / q_2[k]
+            m_2.append(p2_sum)
 
             for i in range(k + 1):
                 p1_sum += ((i ** 2) * p[i])
-            p1_sum = (p1_sum / q1[k]) - (m1[k] ** 2)
+            p1_sum = (p1_sum / q_1[k]) - (m_1[k] ** 2)
             sigma_1.append(p1_sum)
 
             for j in range(k + 1, len(hist)):
                 p2_sum += ((j ** 2) * p[j])
-            p2_sum = (p2_sum / q2[k]) - (m2[k] ** 2)
+            p2_sum = (p2_sum / q_2[k]) - (m_2[k] ** 2)
             sigma_2.append(p2_sum)
 
         except ZeroDivisionError:
             pass
 
     for k in range(len(hist) - 1):
-        sigma_3.append((q1[k] * q2[k]) * ((m1[k] - m2[k]) ** 2))
+        sigma_3.append((q_1[k] * q_2[k]) * ((m_1[k] - m_2[k]) ** 2))
 
     th = np.argmax(sigma_3)
     dst = apply_threshold(img / 255, th / 255)

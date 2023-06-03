@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="69a05119-06f8-43cb-9cd5-f01412e9b5f6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/과제/test.py" afterDir="false" />
+    <list default="true" id="69a05119-06f8-43cb-9cd5-f01412e9b5f6" name="Changes" comment="02:18">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/과제/otsu_threshold.py" beforeDir="false" afterPath="$PROJECT_DIR$/과제/otsu_threshold.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,7 +32,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "C:/Users/rosee/Documents/git/image_processing/hw_12"
+    "last_opened_file_path": "C:/Users/rosee/Documents/git/image_processing/hw_13"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -43,6 +44,18 @@
       <option name="presentableId" value="Default" />
       <updated>1685634881216</updated>
     </task>
+    <task id="LOCAL-00001" summary="02:18">
+      <created>1685639911834</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1685639911834</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="02:18" />
+    <option name="LAST_COMMIT_MESSAGE" value="02:18" />
   </component>
 </project>
