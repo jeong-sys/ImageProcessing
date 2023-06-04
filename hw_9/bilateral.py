@@ -59,7 +59,7 @@ def add_gaus_noise(src, mean=0, sigma=0.1):
     dst += noise
     return my_normalize(dst)
 
-def my_bilateral(src, msize, sigma, sigma_r, pos_x, pos_y, pad_type='zero'):
+def my_bilateral(src, msize, sigma, sigma_r, pos_x, pos_y, pad_type=' zero'):
     ####################################################################################################
     # TODO                                                                                             #
     # my_bilateral 완성                                                                                 #

@@ -101,15 +101,15 @@ if __name__ == '__main__':
     np.random.seed(seed=100)
 
     noise_image = add_gaus_noise(src, mean=0, sigma=0.1)
+    # src_noise = (noise_image / 255).astype(np.float32)
     src_noise = noise_image / 255
+
 
     ######################################################
     # TODO                                               #
     # RGB에서 Bilateral, Gaussian, Median filter 진행     #
     ######################################################
     # RGB
-    b_channel, g_channel, r_channel = cv2.split(src_noise)
-
 
     b_bilateral = my_bilateral(b_channel, 5, 20, 300)
     g_bilateral = my_bilateral(g_channel, 5, 20, 300)
@@ -119,50 +119,62 @@ if __name__ == '__main__':
     g_gaussian = my_filtering(g_channel, my_get_Gaussian2D_mask(5, sigma=20))
     r_gaussian = my_filtering(r_channel, my_get_Gaussian2D_mask(5, sigma=20))
 
+
     b_median = my_median_filtering(b_channel, 5)
     g_median = my_median_filtering(g_channel, 5)
     r_median = my_median_filtering(r_channel, 5)
 
-    rgb_bilateral_dst = cv2.merge([b_bilateral, g_bilateral, r_bilateral])
-    rgb_gaussian_dst = cv2.merge([b_gaussian, g_gaussian, r_gaussian])
-    rgb_median_dst = cv2.merge([b_median, g_median, r_median])
+    rgb_bilateral_dst = my_bilateral(src_noise, 5, 20, 300)
+    rgb_gaussian_dst = my_bilateral(src_noise, my_get_Gaussian2D_mask(5, sigma=20))
+    rgb_median_dst = my_median_filtering(src_noise, 5)
 
     ######################################################
     # TODO                                               #
     # YUV에서 Bilateral, Gaussian, Median filter 진행     #
     ######################################################
-    # YUV
+    # # YUV
     src_noise = src_noise.astype(np.uint8)
     yuv = cv2.cvtColor(src_noise, cv2.COLOR_BGR2YUV)
     y_channel, u_channel, v_channel = cv2.split(yuv)
 
-    y_bilateral = my_bilateral(y_channel, 5, 20, 300)
-    u_bilateral = my_bilateral(u_channel, 5, 20, 300)
-    v_bilateral = my_bilateral(v_channel, 5, 20, 300)
+    y_bilateral = my_bilateral(b_channel, 5, 20, 300) #.astype(np.uint8)
+    yuv_bilateral_dst = cv2.merge([y_bilateral, u_channel, v_channel])
 
-    y_gaussian = my_filtering(y_channel, my_get_Gaussian2D_mask(5, sigma=20))
+    y_gaussian = my_filtering(b_channel, my_get_Gaussian2D_mask(5, sigma=20))
     y_gaussian = np.clip(y_gaussian, 0, 255).astype(np.uint8)
-    u_gaussian = my_filtering(u_channel, my_get_Gaussian2D_mask(5, sigma=20))
-    u_gaussian = np.clip(u_gaussian, 0, 255).astype(np.uint8)
-    v_gaussian = my_filtering(v_channel, my_get_Gaussian2D_mask(5, sigma=20))
-    v_gaussian = np.clip(v_gaussian, 0, 255).astype(np.uint8)
+    yuv_gaussian_dst = cv2.merge([y_gaussian, u_channel, v_channel])
 
     y_median = my_median_filtering(y_channel, 5)
-    u_median = my_median_filtering(u_channel, 5)
-    v_median = my_median_filtering(v_channel, 5)
+    yuv_median_dst = cv2.merge([y_median, u_channel, v_channel])
 
-    yuv_bilateral_dst = cv2.merge([y_bilateral, u_bilateral, v_bilateral])
-    yuv_gaussian_dst = cv2.merge([y_gaussian, u_gaussian, v_gaussian])
-    yuv_median_dst = cv2.merge([y_median, u_median, v_median])
+    # # Bilateral 필터링
+    # y_bilateral = my_bilateral(y_channel, 5, 20, 200)
+    # y_bilateral = np.clip(y_bilateral, 0, 255).astype(np.uint8)
+    # y_bilateral = cv2.resize(y_bilateral, (u_channel.shape[1], u_channel.shape[0]))  # 크기 조정
+    #
+    # yuv_bilateral_dst = cv2.merge([y_bilateral, u_channel, v_channel])
+    #
+    # # Gaussian 필터링
+    # y_gaussian = my_filtering(y_channel, my_get_Gaussian2D_mask(5, sigma=20))
+    # y_gaussian = np.clip(y_gaussian, 0, 255).astype(np.uint8)
+    # y_gaussian_restored = cv2.resize(y_gaussian, (u_channel.shape[1], u_channel.shape[0]),
+    #                                  interpolation=cv2.INTER_LINEAR)  # 크기 복원
+    #
+    # yuv_gaussian_dst = cv2.merge([y_gaussian_restored, u_channel, v_channel])
+    #
+    # # Median 필터링
+    # y_median = my_median_filtering(y_channel, 5)
+    # y_median = np.clip(y_median, 0, 255).astype(np.uint8)
+    # yuv_median_dst = cv2.merge([y_median, u_channel, v_channel])
 
     cv2.imshow('original.png', src)
     cv2.imshow('RGB bilateral', rgb_bilateral_dst)
     cv2.imshow('RGB gaussian', rgb_gaussian_dst)
     cv2.imshow('RGB median', rgb_median_dst)
 
-    cv2.imshow('YUV bilateral', cv2.cvtColor(yuv_bilateral_dst, cv2.COLOR_YUV2BGR))
-    cv2.imshow('YUV gaussian', cv2.cvtColor(yuv_gaussian_dst, cv2.COLOR_YUV2BGR))
-    cv2.imshow('YUV median', cv2.cvtColor(yuv_median_dst, cv2.COLOR_YUV2BGR))
+    # cv2.imshow('YUV bilateral', cv2.cvtColor(yuv_bilateral_dst, cv2.COLOR_YUV2BGR))
+    # cv2.imshow('YUV gaussian', cv2.cvtColor(yuv_gaussian_dst, cv2.COLOR_YUV2BGR))
+    # cv2.imshow('YUV median', cv2.cvtColor(yuv_median_dst, cv2.COLOR_YUV2BGR))
 
     cv2.waitKey()
     cv2.destroyAllWindows()
